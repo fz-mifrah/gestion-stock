@@ -1,0 +1,31 @@
+# ── Fichiers système ──────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+
+# ── Éditeurs / IDE ────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# ── Réglages locaux Claude / outils ───────────────
+.claude/
+.github/modernize/
+
+# ── Back-end (Maven) ──────────────────────────────
+demo/target/
+
+# ── Front-end (Node / Vite / Playwright) ──────────
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
+
+# ── DevSecOps : rapports générés (scans) ──────────
+*-report.html
+*-report.sarif
+trivy-report.*
+zap-report.*

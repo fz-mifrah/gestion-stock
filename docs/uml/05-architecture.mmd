@@ -1,0 +1,26 @@
+%% Architecture technique - Gestion de Stock
+%% Rendu : https://mermaid.live
+flowchart TB
+    subgraph Client["Navigateur — Client"]
+        UI["React 19 + Vite<br/>Pages • Axios • AuthContext • React Router"]
+    end
+
+    subgraph Server["Serveur — Spring Boot 3.2 (Java 17)"]
+        direction TB
+        SEC["Spring Security + JWT<br/>JwtAuthFilter"]
+        CTRL["Controllers REST<br/>/api/auth, /api/produits, ..."]
+        SRV["Services<br/>logique metier"]
+        REPO["Repositories JPA"]
+    end
+
+    DB[("MySQL<br/>gestion_stock")]
+
+    UI -- "HTTP / JSON + Bearer JWT" --> SEC
+    SEC --> CTRL
+    CTRL --> SRV
+    SRV --> REPO
+    REPO --> DB
+    DB --> REPO
+    REPO --> SRV
+    SRV --> CTRL
+    CTRL -- "reponse JSON" --> UI

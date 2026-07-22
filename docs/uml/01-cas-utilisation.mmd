@@ -1,0 +1,48 @@
+%% Diagramme de cas d'utilisation - Gestion de Stock
+%% Mermaid n'a pas de type "use case" natif : représentation en flowchart
+%% (acteur + cas en ellipses + relations include/extend).
+%% Rendu : copier-coller sur https://mermaid.live puis exporter en PNG/SVG
+flowchart LR
+    R["fa:fa-user Responsable"]
+
+    subgraph SYS["Application Gestion de Stock"]
+        UC0(("S'authentifier"))
+        UC1(("Gérer les produits"))
+        UC2(("Consulter le stock"))
+        UC3(("Enregistrer un mouvement"))
+        UC4(("Consulter les alertes"))
+        UC5(("Générer un rapport"))
+        UC6(("Consulter le tableau de bord"))
+        UC7(("Gérer les utilisateurs"))
+        UC1a(("Ajouter un produit"))
+        UC1b(("Modifier un produit"))
+        UC1c(("Supprimer un produit"))
+        UC3a(("Entrée"))
+        UC3b(("Sortie"))
+        UC3c(("Transfert"))
+    end
+
+    R --- UC0
+    R --- UC1
+    R --- UC2
+    R --- UC3
+    R --- UC4
+    R --- UC5
+    R --- UC6
+    R --- UC7
+
+    UC1 -. include .-> UC1a
+    UC1 -. include .-> UC1b
+    UC1 -. include .-> UC1c
+
+    UC3a -. extend .-> UC3
+    UC3b -. extend .-> UC3
+    UC3c -. extend .-> UC3
+
+    UC1 -. include .-> UC0
+    UC2 -. include .-> UC0
+    UC3 -. include .-> UC0
+    UC4 -. include .-> UC0
+    UC5 -. include .-> UC0
+    UC6 -. include .-> UC0
+    UC7 -. include .-> UC0

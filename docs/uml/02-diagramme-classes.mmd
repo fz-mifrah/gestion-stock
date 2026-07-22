@@ -1,0 +1,30 @@
+%% Diagramme de classes (modèle métier) - Gestion de Stock
+%% Rendu facile : copier-coller sur https://mermaid.live puis exporter en PNG/SVG
+classDiagram
+    class Produit {
+        -Long id
+        -String nom
+        -String reference
+        -int quantite
+        -int seuilMinimum
+        -String categorie
+    }
+    class Mouvement {
+        -Long id
+        -String type
+        -int quantite
+        -LocalDate date
+        -String motif
+    }
+    class Utilisateur {
+        -Long id
+        -String login
+        -String motDePasse
+        -String role
+        -String nom
+        -String prenom
+        -String email
+        -String telephone
+    }
+    Produit "1" o-- "0..*" Mouvement : possède
+    Utilisateur "1" o-- "0..*" Mouvement : enregistre

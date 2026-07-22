@@ -1,0 +1,19 @@
+%% Séquence - Ajouter un produit
+%% Rendu facile : copier-coller sur https://mermaid.live puis exporter en PNG/SVG
+sequenceDiagram
+    actor R as Responsable
+    participant UI as React (ProduitForm)
+    participant C as ProduitController
+    participant S as ProduitService
+    participant Repo as ProduitRepository
+    participant DB as MySQL
+    R->>UI: Remplit le formulaire puis "Enregistrer"
+    UI->>C: POST /api/produits (ProduitDTO + JWT)
+    C->>S: create(dto)
+    S->>Repo: save(produit)
+    Repo->>DB: INSERT INTO produit
+    DB-->>Repo: produit (id généré)
+    Repo-->>S: Produit
+    S-->>C: Produit
+    C-->>UI: 201 Created (JSON du produit)
+    UI-->>R: Affiche "Produit ajouté" + recharge la liste

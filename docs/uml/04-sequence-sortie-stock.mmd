@@ -1,0 +1,31 @@
+%% Séquence - Enregistrer une SORTIE de stock (logique métier critique)
+%% Rendu facile : copier-coller sur https://mermaid.live puis exporter en PNG/SVG
+sequenceDiagram
+    actor R as Responsable
+    participant UI as React (Mouvements)
+    participant C as MouvementController
+    participant S as MouvementService
+    participant PR as ProduitRepository
+    participant MR as MouvementRepository
+    participant DB as MySQL
+    R->>UI: Saisit une SORTIE (produit, quantité)
+    UI->>C: POST /api/mouvements (MouvementDTO + JWT)
+    C->>S: enregistrer(dto)
+    S->>PR: findById(produitId)
+    PR->>DB: SELECT produit
+    DB-->>PR: produit
+    PR-->>S: produit
+    alt Stock suffisant (quantité demandée <= stock disponible)
+        S->>S: quantite = quantite - demandé
+        S->>PR: save(produit)
+        PR->>DB: UPDATE produit
+        S->>MR: save(mouvement)
+        MR->>DB: INSERT mouvement
+        S-->>C: Mouvement
+        C-->>UI: 200 OK (JSON du mouvement)
+        UI-->>R: Affiche "Sortie enregistrée"
+    else Stock insuffisant
+        S-->>C: throw StockInsuffisantException
+        C-->>UI: 400 Bad Request { "erreur": "Stock insuffisant..." }
+        UI-->>R: Affiche le message d'erreur
+    end
