@@ -21,7 +21,24 @@ export default function AdminGestion() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    api.get('/admin/utilisateurs')
+      .then(r => {
+        if (!cancelled) setAdmins(r.data);
+      })
+      .catch(() => {
+        if (!cancelled) setError('Impossible de charger la liste des admins');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const openAdd = () => {
     setForm(emptyForm);

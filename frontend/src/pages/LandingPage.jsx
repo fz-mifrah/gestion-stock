@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 
 const features = [
   { icon: '📦', title: 'Gestion des produits', desc: 'Cataloguez vos produits avec références, catégories et seuils d\'alerte personnalisés.' },

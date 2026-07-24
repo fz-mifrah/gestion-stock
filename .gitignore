@@ -12,6 +12,10 @@ Thumbs.db
 # ── Réglages locaux Claude / outils ───────────────
 .claude/
 .github/modernize/
+.env
+*.env
+demo/.env
+frontend/.env
 
 # ── Back-end (Maven) ──────────────────────────────
 demo/target/
@@ -23,9 +27,13 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
 frontend/playwright/.cache/
+.m2/
+.sonar/
 
 # ── DevSecOps : rapports générés (scans) ──────────
 *-report.html
 *-report.sarif
 trivy-report.*
+trivy-*-report.*
 zap-report.*
+.trivycache/
