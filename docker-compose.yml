@@ -1,0 +1,54 @@
+# ──────────────────────────────────────────────────────────────
+#  Environnement conteneurisé complet : MySQL + Backend + Frontend
+#  Sert au dev local ET de cible éphémère pour le DAST (OWASP ZAP).
+#  Les valeurs par défaut (:-...) sont des secrets de DEV uniquement.
+#  En CI / prod, on surcharge via variables d'environnement.
+# ──────────────────────────────────────────────────────────────
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: gs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootdev}
+      MYSQL_DATABASE: ${DB_NAME:-gestion_stock}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build: ./demo
+    image: ${CI_REGISTRY_IMAGE:-gestion-stock}/backend:${IMAGE_TAG:-local}
+    container_name: gs-backend
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/${DB_NAME:-gestion_stock}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-rootdev}
+      JWT_SECRET: ${JWT_SECRET:-GestionStock_DockerDevKey_ChangeMe_32CharsMin}
+      JWT_EXPIRATION: "86400000"
+      DEFAULT_ADMIN_ENABLED: "true"
+      DEFAULT_ADMIN_LOGIN: ${DEFAULT_ADMIN_LOGIN:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-Admin123!}
+      DEFAULT_ADMIN_ROLE: RESPONSABLE
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose:
+      - "8080"
+
+  frontend:
+    build: ./frontend
+    image: ${CI_REGISTRY_IMAGE:-gestion-stock}/frontend:${IMAGE_TAG:-local}
+    container_name: gs-frontend
+    ports:
+      - "80:8080"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
