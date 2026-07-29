@@ -1,0 +1,48 @@
+%% Pipeline CI/CD DevSecOps - StockIQ (GitLab)
+%% Rendu : https://mermaid.live
+flowchart TB
+    DEV["Developpeur<br/>git push"] --> GL["GitLab CI/CD<br/>.gitlab-ci.yml"]
+
+    subgraph S1["1 - VALIDATE"]
+        V["frontend-lint-build<br/>ESLint + build Vite<br/><i>bloquant</i>"]
+    end
+    subgraph S2["2 - TEST"]
+        T["backend-tests<br/>JUnit / Maven<br/><i>bloquant</i>"]
+    end
+    subgraph S3["3 - SAST"]
+        SAST["sonarqube-check<br/>SonarQube - Quality Gate<br/><i>bloquant si SONAR_* definis</i>"]
+    end
+    subgraph S4["4 - BUILD"]
+        B["build-images<br/>docker compose build + push<br/><i>bloquant</i>"]
+    end
+    subgraph S5["5 - SCA"]
+        FS["trivy-fs-scan<br/>deps + secrets + misconfig<br/><i>bloquant HIGH/CRITICAL</i>"]
+        IMG["trivy-image-scan<br/>images Docker<br/><i>bloquant HIGH/CRITICAL</i>"]
+    end
+    subgraph S6["6 - DAST"]
+        ZAP["zap-baseline-scan<br/>OWASP ZAP - scan passif<br/><i>non bloquant - rapport seul</i>"]
+    end
+
+    GL --> S1
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+
+    B -->|push| REG[("GitLab<br/>Container Registry")]
+    REG -.->|pull| IMG
+    REG -.->|pull| ZAP
+
+    FS --> ART["Artifacts<br/>rapports JSON / SARIF / HTML"]
+    IMG --> ART
+    ZAP --> ART
+
+    classDef sast fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef sca fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef dast fill:#fff3e0,stroke:#e65100,color:#bf360c;
+    classDef store fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c;
+    class SAST sast;
+    class FS,IMG sca;
+    class ZAP dast;
+    class REG,ART store;

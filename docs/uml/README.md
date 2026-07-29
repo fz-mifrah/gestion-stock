@@ -8,6 +8,8 @@ Les 4 diagrammes exigés par le cahier des charges (Étape 2), en **Mermaid** (`
 | 2 | Classes (modèle métier) | `02-diagramme-classes.mmd` |
 | 3 | Séquence — Ajouter un produit | `03-sequence-ajouter-produit.mmd` |
 | 4 | Séquence — Sortie de stock | `04-sequence-sortie-stock.mmd` |
+| 5 | Architecture technique | `05-architecture.mmd` |
+| 6 | Pipeline CI/CD DevSecOps (SAST/DAST/SCA) | `06-pipeline-cicd.mmd` |
 
 ## Obtenir les images (PNG/SVG) — sans rien installer
 
