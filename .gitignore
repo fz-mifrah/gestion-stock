@@ -37,3 +37,21 @@ trivy-report.*
 trivy-*-report.*
 zap-report.*
 .trivycache/
+
+# ── Fichiers temporaires Office (verrous Word/PowerPoint) ──
+.~*
+~$*
+
+# ── Secrets / clés (ne jamais publier) ────────────
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# ── Config générée par les scans ZAP locaux ───────
+zap.yaml
+
+# ── Supports de cours (énoncé enseignant) — non publiés ──
+resourses-gestionStock-/

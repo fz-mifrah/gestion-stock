@@ -106,7 +106,8 @@ c.push(new Paragraph({ children: [new PageBreak()] }));
 c.push(h1n('Résumé'));
 c.push(p("Ce projet consiste à concevoir et développer une application web de gestion de stock permettant de centraliser l'inventaire, de suivre les mouvements (entrées, sorties et transferts) et de disposer d'une vision claire et en temps réel de l'état du stock. L'application repose sur une architecture client-serveur clairement séparée : une interface utilisateur développée avec React et une API REST développée avec Spring Boot, communiquant exclusivement via des échanges HTTP au format JSON."));
 c.push(p("Au-delà des fonctionnalités demandées, le projet a été enrichi par une stratégie complète de tests automatisés couvrant à la fois le back-end (tests unitaires et tests d'intégration) et le front-end (tests bout-en-bout dans un navigateur réel), garantissant la fiabilité et la non-régression de l'application."));
-c.push(new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: 'Mots-clés : ', bold: true }), new TextRun('Gestion de stock, Spring Boot, React, API REST, JWT, JPA, MySQL, tests automatisés, JUnit, Playwright.')] }));
+c.push(p("Enfin, le projet a été industrialisé par une conteneurisation Docker et une chaîne d'intégration et de livraison continues (CI/CD) de type DevSecOps, intégrant des analyses de sécurité automatisées — statique (SAST), de composition (SCA) et dynamique (DAST) — à chaque étape de la livraison."));
+c.push(new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: 'Mots-clés : ', bold: true }), new TextRun('Gestion de stock, Spring Boot, React, API REST, JWT, JPA, MySQL, tests automatisés, JUnit, Playwright, Docker, CI/CD, DevSecOps, SonarQube, Trivy, OWASP ZAP.')] }));
 c.push(new Paragraph({ children: [new PageBreak()] }));
 
 // ===== TABLE DES MATIÈRES =====
@@ -383,25 +384,75 @@ c.push(p("Ces tests ont permis de détecter un véritable bug : après la décon
 c.push(p("Un bouton « Lancer les tests E2E » a en outre été intégré au tableau de bord pour exécuter et afficher les résultats directement depuis l'interface (outil de démonstration)."));
 c.push(shot("Panneau « Tests automatisés (E2E) » du tableau de bord : 5 tests réussis"));
 
-// ===== CHAP 8 — APPORTS =====
-c.push(h1('Chapitre 8 — Apports supplémentaires'));
+// ===== CHAP 8 — DEVSECOPS / CI-CD =====
+c.push(h1('Chapitre 8 — Conteneurisation et chaîne DevSecOps (CI/CD)'));
+c.push(p("Afin de rapprocher le projet des pratiques industrielles, l'application a été conteneurisée avec Docker et dotée d'une chaîne d'intégration et de livraison continues (CI/CD) intégrant la sécurité à chaque étape (approche DevSecOps). Cette chaîne, hébergée sur GitLab, automatise la validation, les tests et trois familles d'analyses de sécurité : SAST (analyse statique du code), SCA (analyse des dépendances et des images) et DAST (analyse dynamique de l'application en cours d'exécution)."));
+
+c.push(h2('8.1 Conteneurisation avec Docker'));
+c.push(p("Chaque composant de l'application est empaqueté dans une image Docker. Le back-end utilise une construction multi-étapes (compilation Maven puis exécution sur un JRE léger) et s'exécute avec un utilisateur non privilégié. Le front-end est compilé puis servi par un serveur nginx, lui aussi non privilégié. Un fichier docker-compose orchestre l'ensemble : base de données MySQL, back-end et front-end."));
+c.push(p("Le serveur nginx sert l'interface et relaie les appels /api vers le back-end : l'ensemble est ainsi exposé sur une seule origine, ce qui supprime les problématiques de CORS et fournit une cible unique pour l'analyse de sécurité dynamique. Le lancement de toute la pile s'effectue par une seule commande :"));
+c.push(code('cp .env.example .env   &&   docker compose up --build'));
+c.push(p("L'application est alors accessible sur http://localhost, avec un compte administrateur créé automatiquement au premier démarrage."));
+c.push(shot("Application conteneurisée en cours d'exécution (docker compose) — page d'accueil sur http://localhost"));
+
+c.push(h2('8.2 Pipeline d\'intégration continue (GitLab CI/CD)'));
+c.push(p("Le pipeline est décrit dans le fichier .gitlab-ci.yml et s'exécute automatiquement à chaque envoi de code (git push). Il est organisé en six étapes successives, chaque étape ne démarrant que si la précédente a réussi."));
+c.push(image('06-pipeline-cicd.png', 460, 620));
+c.push(caption("Chaîne CI/CD DevSecOps : validate → test → SAST → build → SCA → DAST"));
+c.push(p("Le tableau suivant récapitule les tâches (jobs) du pipeline et les outils associés :"));
+c.push(tbl([1700, 3200, 2626, 1500],
+  ['Étape', 'Tâche', 'Outil', 'Bloquant'],
+  [
+    ['validate', 'Lint et build du front-end', 'ESLint, Vite', 'Oui'],
+    ['test', 'Tests automatisés du back-end', 'JUnit, Maven', 'Oui'],
+    ['sast', 'Analyse statique du code', 'SonarQube', 'Oui'],
+    ['build', 'Construction des images', 'Docker', 'Oui'],
+    ['sca', 'Analyse dépendances et images', 'Trivy', 'Oui'],
+    ['dast', 'Analyse dynamique', 'OWASP ZAP', 'Non'],
+  ]));
+
+c.push(h2('8.3 SAST — Analyse statique avec SonarQube'));
+c.push(p("L'analyse statique (SAST — Static Application Security Testing) examine le code source sans l'exécuter, afin de détecter les vulnérabilités, les bugs potentiels, les mauvaises pratiques et la dette technique. SonarQube, déployé en conteneur, analyse le code back-end et front-end et applique un « Quality Gate » : si le seuil de qualité n'est pas atteint, le pipeline échoue."));
+c.push(shot("Tableau de bord SonarQube — Quality Gate, vulnérabilités, bugs et couverture du projet"));
+
+c.push(h2('8.4 SCA — Analyse des dépendances et des images avec Trivy'));
+c.push(p("L'analyse de composition logicielle (SCA — Software Composition Analysis) recherche les vulnérabilités connues (CVE) dans les composants tiers. L'outil Trivy est utilisé de deux manières complémentaires : un scan du système de fichiers (dépendances Maven et npm, détection de secrets et de mauvaises configurations) et un scan des images Docker construites (paquets du système d'exploitation et bibliothèques embarquées). Le pipeline échoue en présence d'une vulnérabilité critique ou élevée disposant d'un correctif."));
+c.push(shot("Rapport Trivy — vulnérabilités HIGH/CRITICAL des dépendances et des images Docker"));
+
+c.push(h2('8.5 DAST — Analyse dynamique avec OWASP ZAP'));
+c.push(p("L'analyse dynamique (DAST — Dynamic Application Security Testing) teste l'application en cours d'exécution, comme le ferait un attaquant, pour détecter les vulnérabilités observables à l'exécution (en-têtes de sécurité manquants, divulgation d'informations, etc.). Le pipeline démarre un environnement complet de l'application puis lance un scan passif (baseline) avec OWASP ZAP. Ce contrôle est configuré en mode informatif (non bloquant) : il produit un rapport téléchargeable sans interrompre la livraison, le temps de trier les résultats."));
+c.push(shot("Rapport OWASP ZAP — alertes de l'analyse dynamique (baseline scan)"));
+
+c.push(h2('8.6 Sécurisation de la configuration'));
+c.push(p("En complément des analyses automatiques, la configuration a été durcie : les informations sensibles (identifiants de base de données, secret JWT, mot de passe administrateur) ont été retirées du code et externalisées dans des variables d'environnement. Des fichiers d'exemple (.env.example, application.example.properties) documentent la configuration sans exposer de secret, et le compte administrateur par défaut est désactivé en dehors de l'environnement de développement."));
+c.push(p("Une fois exécuté, le pipeline présente l'enchaînement des étapes et le résultat de chaque contrôle de sécurité :"));
+c.push(shot("Pipeline GitLab exécuté avec succès — étapes validate, test, SAST, build, SCA et DAST"));
+
+// ===== CHAP 9 — APPORTS =====
+c.push(h1('Chapitre 9 — Apports supplémentaires'));
 c.push(p("Au-delà du périmètre demandé, le projet a été enrichi des éléments suivants :"));
 ['Tests automatisés back-end : 27 tests (JUnit 5, Mockito, MockMvc) ;',
  'Tests automatisés front-end : 5 tests bout-en-bout (Playwright) ;',
  'Correction d\'un bug de redirection à la déconnexion, détecté par les tests ;',
  'Bouton intégré au tableau de bord pour lancer les tests depuis l\'interface ;',
  'Diagrammes UML complets (cas d\'utilisation, classes, séquences, architecture) ;',
+ 'Conteneurisation complète avec Docker (Dockerfiles multi-étapes + docker-compose) ;',
+ 'Pipeline CI/CD automatisé sur GitLab (validation, tests et build) ;',
+ 'Sécurité intégrée (DevSecOps) : SAST (SonarQube), SCA (Trivy) et DAST (OWASP ZAP) ;',
+ 'Externalisation des secrets et durcissement de la configuration ;',
  'Lien « Retour à l\'accueil » ajouté sur la page de connexion.'].forEach(t => c.push(bullet(t)));
 
 // ===== CONCLUSION =====
 c.push(h1('Conclusion générale et perspectives'));
 c.push(p("Ce projet a permis de concevoir et de développer une application web complète de gestion de stock respectant l'architecture imposée : une interface React communiquant avec une API REST Spring Boot, sans accès direct à la base de données. L'ensemble des fonctionnalités demandées a été réalisé : authentification sécurisée, gestion des produits et des mouvements, contrôle du stock, alertes, tableau de bord, rapports et documentation Swagger."));
 c.push(p("La principale valeur ajoutée réside dans la mise en place d'une stratégie de tests automatisés couvrant le back-end et le front-end. Cette démarche fiabilise l'application, facilite sa maintenance et a déjà permis de détecter et de corriger un bug réel."));
+c.push(p("Le projet a par ailleurs été industrialisé grâce à une conteneurisation Docker et à une chaîne CI/CD intégrant la sécurité (DevSecOps) : les analyses statique (SonarQube), de composition (Trivy) et dynamique (OWASP ZAP) s'exécutent automatiquement à chaque livraison, ce qui rapproche le projet des standards professionnels."));
 c.push(p("Plusieurs perspectives d'évolution peuvent être envisagées :"));
 ['Export des rapports en formats PDF et Excel ;',
  'Gestion plus fine des rôles et des permissions côté interface ;',
  'Pagination et recherche avancée sur la liste des produits ;',
- 'Déploiement conteneurisé (Docker) et intégration continue (CI).'].forEach(t => c.push(bullet(t)));
+ 'Activation du blocage strict de l\'analyse dynamique (DAST) après tri des alertes ;',
+ 'Scan DAST authentifié piloté par la spécification OpenAPI de l\'API.'].forEach(t => c.push(bullet(t)));
 
 // ===== WEBOGRAPHIE =====
 c.push(h1('Webographie'));

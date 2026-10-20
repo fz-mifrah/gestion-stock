@@ -74,10 +74,11 @@ s.addText([
 s = pres.addSlide();
 header(s, 'Sommaire', 'Plan de la présentation');
 const plan = ['Contexte & objectifs', 'Périmètre fonctionnel', 'Architecture technique', 'Conception UML',
-  'Réalisation back-end & front-end', 'Tests automatisés (valeur ajoutée)', 'Démonstration', 'Bilan & conclusion'];
+  'Réalisation back-end & front-end', 'Tests automatisés (valeur ajoutée)', 'DevSecOps & CI/CD (SAST/DAST/SCA)',
+  'Démonstration', 'Bilan & conclusion'];
 plan.forEach((t, i) => {
-  const col = i < 4 ? 0 : 1; const row = i % 4;
-  const x = 0.9 + col * 6.1, y = 1.9 + row * 1.15;
+  const col = i < 5 ? 0 : 1; const row = i % 5;
+  const x = 0.9 + col * 6.1, y = 1.9 + row * 1.05;
   s.addShape(pres.shapes.OVAL, { x, y, w: 0.7, h: 0.7, fill: { color: i < 4 ? TEAL : MINT } });
   s.addText(String(i + 1), { x, y, w: 0.7, h: 0.7, align: 'center', valign: 'middle', fontSize: 20, bold: true, color: WHITE });
   s.addText(t, { x: x + 0.95, y, w: 5, h: 0.7, valign: 'middle', fontSize: 17, bold: true, color: INK });
@@ -270,7 +271,44 @@ s.addText([
   { text: 'Après déconnexion, l’app revenait vers /login au lieu de l’accueil. Bug corrigé dans PrivateRoute — preuve concrète de l’utilité des tests.', options: { color: INK } },
 ], { x: 5.6, y: 4.25, w: 6.8, h: 1.7, fontSize: 14, paraSpaceAfter: 5, valign: 'middle' });
 
-// ── Slide 15 — Démonstration ───────────────────────────────────────
+// ── Section DevSecOps ──────────────────────────────────────────────
+divider('Industrialisation', 'DevSecOps & CI/CD', 'Sécurité intégrée au pipeline : SAST • SCA • DAST');
+
+// ── Pipeline CI/CD ─────────────────────────────────────────────────
+s = pres.addSlide();
+header(s, 'Intégration continue', 'Pipeline CI/CD — GitLab');
+const pipe = fit('06-pipeline-cicd.png', 3.5, 5.3);
+s.addImage({ path: path.join(UML, '06-pipeline-cicd.png'), x: 12.4 - pipe.w, y: 1.5, w: pipe.w, h: pipe.h });
+s.addText([
+  { text: '6 étapes automatiques à chaque « git push »', options: { bold: true, breakLine: true } },
+  { text: 'validate — lint + build du front (ESLint, Vite)', options: { breakLine: true } },
+  { text: 'test — 27 tests back-end (JUnit / Maven)', options: { breakLine: true } },
+  { text: 'sast — analyse statique (SonarQube)', options: { breakLine: true } },
+  { text: 'build — images Docker → Container Registry', options: { breakLine: true } },
+  { text: 'sca — dépendances + images (Trivy)', options: { breakLine: true } },
+  { text: 'dast — analyse dynamique (OWASP ZAP)', options: {} },
+].map(o => ({ text: o.text, options: { ...o.options, bullet: { code: '2022' }, fontSize: 15.5, color: INK, paraSpaceAfter: 9 } })),
+{ x: 0.9, y: 1.9, w: 7.6, h: 4.8 });
+
+// ── Trois piliers SAST / SCA / DAST ────────────────────────────────
+s = pres.addSlide();
+header(s, 'Sécurité', 'Docker + 3 piliers : SAST · SCA · DAST');
+const pillars = [
+  ['🐳', 'Docker', 'Conteneurisation multi-étapes, images non-root, orchestration docker-compose (MySQL + back + front).'],
+  ['🔍', 'SAST — SonarQube', 'Analyse statique du code : vulnérabilités, bugs et dette technique (Quality Gate bloquant).'],
+  ['📦', 'SCA — Trivy', 'Vulnérabilités connues (CVE) des dépendances et des images Docker, détection de secrets.'],
+  ['🕷️', 'DAST — OWASP ZAP', 'Analyse dynamique de l’application en cours d’exécution (scan passif « baseline »).'],
+];
+pillars.forEach((f, i) => {
+  const col = i % 2, row = Math.floor(i / 2);
+  const x = 0.9 + col * 6.0, y = 1.95 + row * 2.3;
+  card(s, x, y, 5.6, 2.05);
+  bubble(s, x + 0.3, y + 0.35, f[0], i % 2 ? TEAL : MINT);
+  s.addText(f[1], { x: x + 1.15, y: y + 0.35, w: 4.2, h: 0.6, valign: 'middle', fontSize: 17, bold: true, color: INK });
+  s.addText(f[2], { x: x + 0.35, y: y + 1.1, w: 5.0, h: 0.85, fontSize: 12.5, color: MUTED });
+});
+
+// ── Slide — Démonstration ──────────────────────────────────────────
 const d = divider('Place à la pratique', 'Démonstration', null);
 d.addText([
   { text: '1.  Connexion (admin / admin123)', options: { breakLine: true } },
@@ -287,18 +325,19 @@ s.addText('Cahier des charges : 100 % couvert', { x: 0.9, y: 1.8, w: 7, h: 0.4, 
 [['✅', 'Auth JWT, CRUD produits, mouvements'], ['✅', 'Contrôle de stock & alertes de seuil'],
  ['✅', 'Tableau de bord, rapports, Swagger'], ['✅', 'Architecture en couches, front/back séparés']]
   .forEach((it, i) => {
-    s.addText(it[0], { x: 0.9, y: 2.3 + i * 0.58, w: 0.5, h: 0.5, fontSize: 15 });
-    s.addText(it[1], { x: 1.4, y: 2.3 + i * 0.58, w: 6.1, h: 0.5, valign: 'middle', fontSize: 14.5, color: INK });
+    s.addText(it[0], { x: 0.9, y: 2.3 + i * 0.52, w: 0.5, h: 0.5, fontSize: 15 });
+    s.addText(it[1], { x: 1.4, y: 2.3 + i * 0.52, w: 6.1, h: 0.5, valign: 'middle', fontSize: 14.5, color: INK });
   });
 s.addText('Apports supplémentaires', { x: 8.0, y: 1.8, w: 5, h: 0.4, fontSize: 16, bold: true, color: MINT });
 [['🧪', '27 tests back-end + 5 tests E2E'], ['🐛', 'Bug de déconnexion corrigé'],
- ['🖱️', 'Lancement des tests depuis le dashboard'], ['📐', 'Diagrammes UML complets']]
+ ['📐', 'Diagrammes UML complets'], ['🐳', 'Conteneurisation Docker + CI/CD'],
+ ['🔐', 'DevSecOps : SAST · SCA · DAST']]
   .forEach((it, i) => {
-    s.addText(it[0], { x: 8.0, y: 2.3 + i * 0.58, w: 0.5, h: 0.5, fontSize: 15 });
-    s.addText(it[1], { x: 8.5, y: 2.3 + i * 0.58, w: 4.3, h: 0.5, valign: 'middle', fontSize: 14.5, color: INK });
+    s.addText(it[0], { x: 8.0, y: 2.3 + i * 0.52, w: 0.5, h: 0.5, fontSize: 15 });
+    s.addText(it[1], { x: 8.5, y: 2.3 + i * 0.52, w: 4.3, h: 0.5, valign: 'middle', fontSize: 14.5, color: INK });
   });
 card(s, 0.9, 5.0, 11.6, 1.5, NAVY);
-s.addText('Perspectives : export PDF/Excel des rapports • rôles & permissions fins • pagination • déploiement Docker',
+s.addText('Perspectives : export PDF/Excel des rapports • rôles & permissions fins • pagination • DAST authentifié (OpenAPI)',
   { x: 1.1, y: 5.0, w: 11.2, h: 1.5, valign: 'middle', fontSize: 14.5, color: WHITE, align: 'center' });
 
 // ── Slide 17 — Merci ───────────────────────────────────────────────
