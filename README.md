@@ -27,7 +27,7 @@
 10. [Résultats](#-résultats)
 11. [Structure du projet](#-structure-du-projet)
 12. [Documentation](#-documentation)
-13. [Auteur](#-auteur)
+13. [Auteure](#-auteure)
 
 ---
 
@@ -253,9 +253,9 @@ validate ──► test ──► sast ──► build ──► sca ──► d
 - 📄 Rapport et présentation du projet : dossier [`docs/`](docs/)
 - 🔎 API interactive : `http://localhost:8080/swagger-ui.html` (backend démarré)
 
-## 👩‍💻 Auteur
+## 👩‍💻 Auteure
 
-**Fatim Mifrah** · 4ᵉ année de Génie Informatique · à la recherche d'un **stage de fin d'études (PFE)**.
+**Fatima Ezzahra Mifrah** · 4ᵉ année de Génie Informatique · à la recherche d'un **stage de fin d'études (PFE)**.
 
 - 📧 mifrah.fz1@gmail.com
-- 💼 LinkedIn : *à compléter*
+- 🐙 GitHub : [@fz-mifrah](https://github.com/fz-mifrah)

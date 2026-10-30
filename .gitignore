@@ -9,7 +9,7 @@ Thumbs.db
 *.iml
 *.swp
 
-# ── Réglages locaux Claude / outils ───────────────
+# ── Réglages locaux des outils ──────────────────────
 .claude/
 .github/modernize/
 .env
